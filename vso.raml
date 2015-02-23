@@ -1,0 +1,304 @@
+#%RAML 0.8
+title: Visua Studio Online API
+baseUri: https://{account}.visualstudio.com
+baseUriParameters:
+    account:
+        description: The name of the Visual Studio Online account
+        type: string
+        required: true
+mediaType: application/json
+protocols: [ HTTPS ]
+version: 1.0
+securitySchemes:
+    - basic_auth:
+        type: Basic Authentication
+        describedBy:
+            headers:
+                Authorization:
+                    description: |
+                        Uses Basic Authentication with username and password credentials.
+                    type: string
+    - oauth_2_0:
+        type: OAuth 2.0
+        describedBy:
+            headers:
+                Authorization:
+                    description: |
+                        Used to send a valid OAuth 2 access token. Do not use together with
+                        the "access_token" queryParameters string parameter.
+                    type: string
+            queryParameters:
+                access_token:
+                    description: |
+                        Used to send a valid OAuth 2 access token. Do not use together with
+                        the "Authorization" header
+                    type: string
+        settings:
+            authorizationUri: https://app.vssps.visualstudio.com/oauth2/authorize
+            accessTokenUri: https://app.vssps.visualstudio.com/oauth2/token
+            authorizationGrants: [ code, token ]
+            scopes:
+                - vso.profile
+                - vso.build
+                - vso.build_execute
+                - vso.code
+                - vso.code_write
+                - vso.code_manage
+                - vso.chat_write
+                - vso.chat_manage
+                - vso.test
+                - vso.test_write
+                - vso.work
+                - vso.work_write
+securedBy: [ basic_auth, oauth_2_0 ]
+traits:
+    - paged:
+        queryParameters:
+            $top:
+                type: integer
+                default: 100
+                required: false
+            $skip:
+                type: integer
+                default: 0
+                required: false
+#    - secured: !include http://raml-example.com/secured.yml
+    - versioned:
+        queryParameters:
+            api-version:
+                description: Api version
+                type: integer
+                required: true
+schemas:
+    - profile: !include schemas/profile.schema
+    - account: !include schemas/account.schema
+resourceTypes:
+    - collection:
+        get:
+            responses:
+                200:
+                    body:
+                        application/json:
+                            example: |
+                                {
+                                    "count": <<count>>,
+                                    "value": <<value>>
+                                }
+documentation:
+    - title: Basics of Authentication
+      content: !include docs/basics-of-authentication.md
+/_apis:
+    /profile/profiles/me:
+        displayName: Profiles
+        is: [ versioned ]
+        securedBy: [ null, oauth_2_0 ]
+        baseUriParameters:
+            account:
+                default: app.vssps
+                #enum: [ "app.vssps" ]
+        get:
+            queryParameters:
+                api-version:
+                    default: 1.0-preview
+            description: Get profile of currently logged-in user
+            responses:
+                200:
+                    body:
+                        application/json:
+                            schema: profile
+                            example: !include examples/profile.example
+    /accounts:
+        displayName: Accounts
+        description: Get a list of accounts
+        is: [ versioned ]
+        securedBy: [ null, oauth_2_0 ]
+        baseUriParameters:
+            account:
+                enum: [ "app.vssps" ]
+        type:
+            collection:
+                count: 2
+                value: !include examples/accounts.example
+        get:
+            queryParameters:
+                memberId:
+                    description: by member-id
+                ownerId:
+                    description: by owner-id
+    /projectcollection:
+        /{collection}:
+            is: [ versioned ]
+            description: Get a project collection
+            get:
+                responses:
+                    200:
+                        body:
+                            application/json:
+                                example: !include examples/projectcollection.example
+/{collection}:
+    uriParameters:
+        collection:
+            default: defaultcollection
+            required: true
+    /_apis:
+        /projects:
+            is: [ versioned, paged ]
+            type:
+                collection:
+                    count: 3
+                    value: !include examples/projects.example
+            get:
+                description: By state filter
+                queryParameters:
+                    stateFilter:
+                        description: Return team projects in a specific team project state.
+                        type: string
+                        enum: [ WellFormed, CreatePending, Deleting, New, All ]
+                        default: WellFormed
+            /{project}:
+                is: [ versioned ]
+                description: Get metadata on a team project, including its capabilities.
+                get:
+                    queryParameters:
+                        includeCapabilities:
+                            description: Use `true` to include capabilities (such as source control) in the team project result.
+                            type: boolean
+                            default: false
+                            required: false
+                    responses:
+                        200:
+                            body:
+                                application/json:
+                                    example: |
+                                        {
+                                            "id": "eb6e4656-77fc-42a1-9181-4c6d8e9da5d1",
+                                            "name": "Fabrikam-Fiber-TFVC",
+                                            "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/projects/eb6e4656-77fc-42a1-9181-4c6d8e9da5d1",
+                                            "description": "Team Foundation Version Control projects.",
+                                            "state": "wellFormed",
+                                            "capabilities":
+                                            {
+                                                "versioncontrol":
+                                                {
+                                                    "sourceControlType": "Tfvc"
+                                                },
+                                                "processTemplate":
+                                                {
+                                                    "templateName": "Microsoft Visual Studio Scrum 2013"
+                                                }
+                                            },
+                                            "_links":
+                                            {
+                                                "self":
+                                                {
+                                                    "href": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/projects/eb6e4656-77fc-42a1-9181-4c6d8e9da5d1"
+                                                },
+                                                "collection":
+                                                {
+                                                    "href": "https://fabrikam.visualstudio.com/_apis/projectCollections/d81542e4-cdfa-4333-b082-1ae2d6c3ad16"
+                                                },
+                                                "web":
+                                                {
+                                                    "href": "https://fabrikam.visualstudio.com/DefaultCollection/Fabrikam-Fiber-TFVC"
+                                                }
+                                            },
+                                            "defaultTeam":
+                                            {
+                                                "id": "66df9be7-3586-467b-9c5f-425b29afedfd",
+                                                "name": "Fabrikam-Fiber-TFVC Team",
+                                                "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/projects/eb6e4656-77fc-42a1-9181-4c6d8e9da5d1/teams/66df9be7-3586-467b-9c5f-425b29afedfd"
+                                            }
+                                        }
+                patch:
+                    description: Update a project's description.
+                    body:
+                        application/json:
+                            schema: |
+                                {
+                                    "$schema": "http://json-schema.org/draft-03/schema",
+                                    "type": "object",
+                                    "properties":
+                                        {
+                                            "description": "string"
+                                        }
+                                }
+                            example: |
+                                {
+                                    "description": "Team Foundation Version Control projects."
+                                }
+                    responses:
+                        200:
+                            body:
+                                application/json:
+                                    example: |
+                                        {
+                                            "id": "eb6e4656-77fc-42a1-9181-4c6d8e9da5d1",
+                                            "name": "Fabrikam-Fiber-TFVC",
+                                            "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/projects/eb6e4656-77fc-42a1-9181-4c6d8e9da5d1",
+                                            "description": "Team Foundation Version Control projects.",
+                                            "state": "wellFormed",
+                                            "capabilities":
+                                            {
+                                                "versioncontrol":
+                                                {
+                                                    "sourceControlType": "Tfvc"
+                                                },
+                                                "processTemplate":
+                                                {
+                                                    "templateName": "Microsoft Visual Studio Scrum 2013"
+                                                }
+                                            },
+                                            "_links":
+                                            {
+                                                "self":
+                                                {
+                                                    "href": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/projects/eb6e4656-77fc-42a1-9181-4c6d8e9da5d1"
+                                                },
+                                                "collection":
+                                                {
+                                                    "href": "https://fabrikam.visualstudio.com/_apis/projectCollections/d81542e4-cdfa-4333-b082-1ae2d6c3ad16"
+                                                },
+                                                "web":
+                                                {
+                                                    "href": "https://fabrikam.visualstudio.com/DefaultCollection/Fabrikam-Fiber-TFVC"
+                                                }
+                                            },
+                                            "defaultTeam":
+                                            {
+                                                "id": "66df9be7-3586-467b-9c5f-425b29afedfd",
+                                                "name": "Fabrikam-Fiber-TFVC Team",
+                                                "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/projects/eb6e4656-77fc-42a1-9181-4c6d8e9da5d1/teams/66df9be7-3586-467b-9c5f-425b29afedfd"
+                                            }
+                                        }
+                /teams:
+                    is: [ paged ]
+                    type:
+                        collection:
+                            count: 2
+                            value: !include examples/teams.example
+                    get:
+                        description: Get all teams within the project that the authenticated user has access to.
+                    /{team}:
+                        is: [ versioned ]
+                        description: Get a team
+                        get:
+                            responses:
+                                200:
+                                    body:
+                                        application/json:
+                                            example: |
+                                                {
+                                                    "id": "564e8204-a90b-4432-883b-d4363c6125ca",
+                                                    "name": "Quality assurance",
+                                                    "url": "https://fabrikam.visualstudio.com/DefaultCollection/_apis/projects/eb6e4656-77fc-42a1-9181-4c6d8e9da5d1/teams/564e8204-a90b-4432-883b-d4363c6125ca",
+                                                    "description": "Testing staff",
+                                                    "identityUrl": "https://fabrikam-fiber-inc.vssps.visualstudio.com/_apis/Identities/564e8204-a90b-4432-883b-d4363c6125ca"
+                                                }
+                        /members:
+                            is: [ versioned, paged ]
+                            description: Append /members to the end of the URL to get a list of identity references for the team's members.
+                            type:
+                                collection:
+                                    count: 3
+                                    value: !include examples/teammembers.example
+                            get:
