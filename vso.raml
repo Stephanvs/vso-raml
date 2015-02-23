@@ -302,3 +302,45 @@ documentation:
                                     count: 3
                                     value: !include examples/teammembers.example
                             get:
+        /hooks:
+            /subscriptions:
+                description: |
+                    A subscription tells service hooks to listen for certain events and send them to a particular consumer.
+                    Subscriptions may supply publisher and consumer property values such as the TFS team project to filter events, or the Trello board ID for use when creating a new card on Trello, for example.
+                get:
+                    type:
+                        collection:
+                            count: 12
+                            value: !include examples/subscriptions.example
+                    description: Get a list of subscriptions
+                    responses:
+                        200:
+                post:
+                    description: Create a subscription
+                    responses:
+                        200:
+                put:
+                    description: Update a subscription
+                    responses:
+                        200:
+                delete:
+                    description: Delete a subscription
+                    responses:
+                        204:
+                /{id}:
+                    get:
+                        description: Get a subscription
+                        responses:
+                            200:
+            /publishers:
+                description: |
+                    A publisher is a service that publishes events to service hooks. For example, Team Foundation Server is a publisher which sends code, build, work item, and other events.
+                get:
+                    description: Get a list of publishers
+                /tfs/eventTypes:
+                    get:
+                        responses:
+                            200:
+                                body:
+                                    application/json:
+                                        example : |
