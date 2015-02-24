@@ -322,8 +322,9 @@ documentation:
                             example: !include examples/subscription-post.example
                     responses:
                         200:
-                            application/json:
-                                example: !include examples/subscription-post-response.example
+                            body:
+                                application/json:
+                                    example: !include examples/subscription-post-response.example
                 put:
                     description: Update a subscription
                     responses:
