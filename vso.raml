@@ -108,7 +108,6 @@ documentation:
                             example: !include examples/profile.example
     /accounts:
         displayName: Accounts
-        description: Get a list of accounts
         securedBy: [ null, oauth_2_0 ]
         baseUriParameters:
             account:
@@ -118,6 +117,7 @@ documentation:
                 count: 2
                 value: !include examples/accounts.example
         get:
+            description: Get a list of accounts
             is: [ versioned ]
             queryParameters:
                 memberId:
@@ -127,8 +127,8 @@ documentation:
     /projectcollection:
         /{collection}:
             is: [ versioned ]
-            description: Get a project collection
             get:
+                description: Get a project collection
                 responses:
                     200:
                         body:
@@ -156,8 +156,8 @@ documentation:
                         default: WellFormed
             /{project}:
                 is: [ versioned ]
-                description: Get metadata on a team project, including its capabilities.
                 get:
+                    description: Get metadata on a team project, including its capabilities.
                     queryParameters:
                         includeCapabilities:
                             description: Use `true` to include capabilities (such as source control) in the team project result.
@@ -279,8 +279,8 @@ documentation:
                         description: Get all teams within the project that the authenticated user has access to.
                     /{team}:
                         is: [ versioned ]
-                        description: Get a team
                         get:
+                            description: Get a team
                             responses:
                                 200:
                                     body:
@@ -302,6 +302,9 @@ documentation:
                                     value: !include examples/teammembers.example
                             get:
         /hooks:
+            description:
+                The service hook publishers define a set of events.
+                You create subscriptions based on an event and select the service hook consumer and action to take in response to that event from the publishers.
             /subscriptions:
                 is: [ versioned ]
                 description: |
