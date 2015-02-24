@@ -90,7 +90,6 @@ documentation:
 /_apis:
     /profile/profiles/me:
         displayName: Profiles
-        is: [ versioned ]
         securedBy: [ null, oauth_2_0 ]
         baseUriParameters:
             account:
@@ -110,7 +109,6 @@ documentation:
     /accounts:
         displayName: Accounts
         description: Get a list of accounts
-        is: [ versioned ]
         securedBy: [ null, oauth_2_0 ]
         baseUriParameters:
             account:
@@ -120,6 +118,7 @@ documentation:
                 count: 2
                 value: !include examples/accounts.example
         get:
+            is: [ versioned ]
             queryParameters:
                 memberId:
                     description: by member-id
@@ -271,7 +270,7 @@ documentation:
                                             }
                                         }
                 /teams:
-                    is: [ paged ]
+                    is: [ versioned, paged ]
                     type:
                         collection:
                             count: 2
@@ -304,21 +303,27 @@ documentation:
                             get:
         /hooks:
             /subscriptions:
+                is: [ versioned ]
                 description: |
                     A subscription tells service hooks to listen for certain events and send them to a particular consumer.
                     Subscriptions may supply publisher and consumer property values such as the TFS team project to filter events, or the Trello board ID for use when creating a new card on Trello, for example.
+                type:
+                    collection:
+                        count: 12
+                        value: !include examples/subscriptions.example
                 get:
-                    type:
-                        collection:
-                            count: 12
-                            value: !include examples/subscriptions.example
                     description: Get a list of subscriptions
                     responses:
                         200:
                 post:
                     description: Create a subscription
+                    body:
+                        application/json:
+                            example: !include examples/subscription-post.example
                     responses:
                         200:
+                            application/json:
+                                example: !include examples/subscription-post-response.example
                 put:
                     description: Update a subscription
                     responses:
@@ -328,19 +333,35 @@ documentation:
                     responses:
                         204:
                 /{id}:
+                    is: [ versioned ]
                     get:
                         description: Get a subscription
-                        responses:
-                            200:
             /publishers:
+                is: [ versioned ]
                 description: |
                     A publisher is a service that publishes events to service hooks. For example, Team Foundation Server is a publisher which sends code, build, work item, and other events.
                 get:
                     description: Get a list of publishers
                 /tfs/eventTypes:
+                    is: [ versioned ]
                     get:
-                        responses:
-                            200:
-                                body:
-                                    application/json:
-                                        example : |
+                        description: Get supported events
+            /consumers:
+                is: [ versioned ]
+                description: |
+                    A service hook consumer is the external service targeted by a subscription.
+                    Consumers, their supported actions, and the descriptors that define the inputs required for those actions are the primary resources in the Consumer APIs.
+                get:
+                    description: Get a list of consumers
+                /{consumer}:
+                    is: [ versioned ]
+                    description: Get a consumer
+                    get:
+                    /actions:
+                        is: [ versioned ]
+                        get:
+                            description: Get a list of consumer actions
+                        /{action}:
+                            is: [ versioned ]
+                            get:
+                                description: Get a consumer action Get a list of consumer actions

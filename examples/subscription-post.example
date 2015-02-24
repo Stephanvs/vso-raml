@@ -1,0 +1,17 @@
+{
+    "publisherId": "tfs",
+    "eventType": "build.complete",
+    "resourceVersion": "1.0-preview.1",
+    "consumerId": "webHooks",
+    "consumerActionId": "httpRequest",
+    "publisherInputs":
+    {
+        "buildStatus": "Failed",
+        "definitionName": "MyWebSite CI",
+        "projectId": "6ce954b1-ce1f-45d1-b94d-e6bf2464ba2c"
+    },
+    "consumerInputs":
+    {
+        "url": "https://myservice/myhookeventreceiver"
+    }
+}
