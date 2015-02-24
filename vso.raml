@@ -90,6 +90,7 @@ documentation:
 /_apis:
     /profile/profiles/me:
         displayName: Profiles
+        is: [ versioned ]
         securedBy: [ null, oauth_2_0 ]
         baseUriParameters:
             account:
@@ -109,6 +110,7 @@ documentation:
     /accounts:
         displayName: Accounts
         securedBy: [ null, oauth_2_0 ]
+        is: [ versioned ]
         baseUriParameters:
             account:
                 enum: [ "app.vssps" ]
@@ -118,7 +120,6 @@ documentation:
                 value: !include examples/accounts.example
         get:
             description: Get a list of accounts
-            is: [ versioned ]
             queryParameters:
                 memberId:
                     description: by member-id
